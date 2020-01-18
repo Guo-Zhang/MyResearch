@@ -1,0 +1,404 @@
+\documentclass{beamer}
+
+% theme
+\mode<presentation>
+{
+\usetheme{Warsaw}
+
+\setbeamercovered{transparent}
+}
+
+% packages
+\usepackage{multicol}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+% setting
+\linespread{1.2}
+
+% title page
+\title{Consumer Quality Search and Platform Algorithm Design: A Structural Apporach}
+\subtitle{Working in Progress}
+\author{
+Guo Zhang
+\thanks{WISE, Xiamen University. Email: zhangguo@stu.xmu.edu.cn. All codes can be found here: \url{https://github.com/xmucpp/online_quality_search/blob/master/consumer_quality_search.ipynb}}
+}
+\date{This Version: \today}
+
+\begin{document}
+
+\begin{frame}%[plain]
+\maketitle
+\end{frame}
+
+\begin{frame}[plain]
+\frametitle{Contents}
+%\begin{multicols}{2}
+\tableofcontents[hideallsubsections]
+%\end{multicols}
+\end{frame}
+
+\section{Introduction}
+\begin{frame}
+\frametitle{Motivation}
+\begin{itemize}
+\item A design or improvement of algorithms and mechanisms can produce revenue of millions of dollars for online platforms.
+\item An efficient and well-organized method for a certain situation is valuable for business leaders and managers to make data-driven decisions. 
+\item The underlying processes that makes them work have not been clarified with structural frameworks for many cases.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Theme}
+\begin{itemize}
+\item Structurally Modeling consumer search based on prices and historical sales, dynamic pricing of sellers and market equilibrium 
+on the environment of ranking algorithms based on prices and historical sales on the search engine of Tmall\footnotemark with consideration set approach. 
+\footnotetext{Example: \url{https://list.tmall.com/search_product.htm?q=\%BD\%B4\%D3\%CD}}
+\item Looking for the optimal weighting of prices and historical sales for ranking algorithms to maximize consumer/seller/total welfare with the structural-form model.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Overview}
+\begin{itemize}
+\item Background of online consumer search and seller pricing
+\item Model of consumer search, seller pricing and market equilibrium
+\item Estimation of model parameters (doing)
+\item Simulation to find optimal weighting of ranking algorithms (to do)
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Literatures Review}
+\begin{itemize}
+  \item Search friction and price dispersion
+  \item Limited consumer search
+  \item Search obfuscation
+  \item Reputation Mechanism
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Literatures Review - Framework}
+\begin{itemize}
+\item Levin et.al. (2014): structuring consumer search and platform design for online retailers
+\item Fan et.al. (2013): cross-period return to reputation and reputation management for sellers
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Literatures Review - Search Friction and Price Dispersion}
+\begin{itemize}
+\item Baye et.al. (2014): price dispersion is persistent and is greater in the market with smaller number of products on online markets
+\begin{itemize}
+\item Reinganum (1979): positive search costs
+\item Spulber (1995): private information
+\item Stahl (1989): heterogeneous consumers with different search costs
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Literatures Review - Limited Consumer Search}
+\begin{itemize}
+\item Goeree (2008): limited consumer information and advertising in PC industry with consideration set approach
+\item Levin et.al. (2014): search engine instead
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Literatures Review - Search Obfusaction}
+\begin{itemize}
+\item Ellison et.al. (2009): search obfuscation on the environment of search engine
+\end{itemize}
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Literatures Review - Reputation Mechanism}
+%\begin{itemize}
+%\item 
+%\end{itemize}
+%\end{frame}
+
+
+\section{Background}
+\subsection{The Organization of Markets with Online Platforms}
+\begin{frame}
+\frametitle{The Organization of Markets with Online Platforms}
+\begin{itemize}
+  \item Overcome the limitation of geographic and social barriers
+  \item Increase the search costs of users by crowding a large amount of information
+  \begin{itemize}
+    \item Platforms usually desgin algorithms to display products with higher quality and higher relevance for users in practice.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Platform Algorithm Design}
+\begin{frame}
+\frametitle{Platform Algorithm Design}
+\begin{itemize}
+ \item Ranking: centralized, often all the results
+ \item Recommendation: personalized, often a limited amount of results
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Different Approaches of Ranking Designs}
+\begin{itemize}
+\item Sort by sales
+\item Sort by prices
+\item Sort by date
+\item Best Match (mixed methods) 
+\end{itemize}
+\end{frame}
+
+\subsection{Consumer Online Search}
+\begin{frame}
+\frametitle{Dimensions of Consumer Online Search}
+\begin{itemize}
+\item Step 1: search relevant products
+\begin{itemize}
+\item \textbf{User query} or \textbf{keyword search}
+\item Advertising (i.e. home page, social media, video platforms)
+\item Recommendation (i.e. home page, item page)
+\end{itemize}
+\item Step 2: search products with attractive \textbf{prices} and \textbf{qualities} (which we will focus in this paper)
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Consideration Set Approach}
+\begin{itemize}
+  \item Ranking algorithms provide consideration set from all available products
+  \item Consumers make decision in the consideration set
+\end{itemize}
+\end{frame}
+
+\subsection{Stategies and Decisions of Sellers}
+\begin{frame}
+\frametitle{Stategies and Decisions of Sellers}
+\begin{itemize}
+  \item Make strategies on prices, quality, relevance, reputation, etc.
+  \item Search obfuscation
+\end{itemize}
+\end{frame}
+
+\section{Model}
+\begin{frame} 
+\frametitle{Consumer Utility}
+\begin{itemize}
+\item Utility of consumer j for product i at period t: 
+$$u_{ijt}=\alpha_0 + \alpha_p p_{jt} + \alpha_q ln(q_{j,t-1}) +\varepsilon_{ijt}$$
+\item Choice probability given consideration set by logit discrete choice model:
+$$
+P(j|j\in L_{it}) = \frac{\exp(\alpha_0+\alpha_1 p_{jt}+\alpha_q ln(q_{j,t-1}))}{\sum_{k \in L} \exp(\alpha_0+\alpha_p p_{kt}+\alpha_q ln(q_{k,t-1}))}
+$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+\frametitle{Consideration Set}
+\begin{itemize}
+\item Sampling weight for consumer j at period t with Wallenius' non-central hypergeometric distribution:
+\begin{align*}
+w_{jt}  = &\exp[-\gamma_p (\frac{p_{jt}-\min_{k \in J_t}(p_{kt})}{std_{k \in J_t}}) \\
+&+ \gamma_q (\frac{q_{jt}-\min_{k \in J_t}(ln(q_{kt}))}{std_{k \in J_t}(ln(q_{kt}))})  \\
+]
+\end{align*}
+\item The probability of product $j$ in the consideration set at period t:
+$$
+P(j \in L_t | j \in J_t) = 1 - \Pi_{k=1}^{l}(1-p_{kt})
+$$
+where
+$$
+P(j_{lt} \in L_t | j_{1t} \in J_t) = \frac{w_{j_l t}}{\sum_{k \in J_t}(w_{kt})}
+$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Market Demand}
+\begin{itemize}
+\item Choice probability of product j at period t:
+$$
+D(p_{jt}) = \sum_{L_{it}: L_{it}\in J_t} P(j|j\in L_{it})P(j \in L_{it}|j\in J_t)
+$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Seller Pricing and Equilibrium}
+\begin{itemize}
+\item Profit of seller/product j in each period:
+$$
+\pi_{jt}  = (p_{jt}-c_{j})D_{jt}(p_{jt})
+$$
+\item One-Period:
+$$
+\max_{p_j} \pi_{jt}
+$$
+\item Muti-Period:
+$$
+\max_{p_{jt}} \Pi_{j}=\max_{p_jt} \sum_{t=0}^{\infty}\beta^t\pi_{jt}
+$$
+\end{itemize}
+\end{frame}
+
+
+\section{Data}
+\begin{frame}[allowframebreaks]
+\frametitle{Data Source}
+\begin{itemize}
+\item Source: results given keywords on the product search engine of Tmall collected by China's Prices Project\footnotemark
+\footnotetext{\tiny{China's Prices Project is an academic initiative and technology firm working on economic and business big data found by Guo Zhang. A data warehouse of price data from the search page of Tmall and JD is constructing with big data technology.}}
+\item Time Period: daily data from May 2016 - Present
+\item Variables: price, monthly sales, comment number, name of goods, URL of product page, name of shop, name of shop page, rank method, scrape time, category information, page number, rank order, etc.
+\item Observations:  more than 1 billion
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Data Sample}
+\begin{itemize}
+  \item First 3 pages(117 results) on search result pages displayed on APPs of Tmall and JD from Jan 2017 to now
+  \item One day (2017-04-01) of data with keyword "apple" is selected in this version
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Summarized Statistics}
+\begin{table}[!hbp]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Listings Data} & \textbf{Values} \\
+\hline 
+Number of Listings Number of Sellers & 117 \\
+\hline
+\% of Sellers with $>$ 1  & 25.64\% \\
+\hline
+Listing Mean List Price & 57.83  \\
+\hline 
+Median List Price & 46.8  \\
+\hline
+Standard Deviation of List Price & 44.86 \\
+\hline
+\end{tabular}
+\caption{\label{summary}: Summarized Statistics}
+\end{table}
+\end{frame}
+
+\begin{frame}
+\frametitle{Correlations}
+\begin{table}[!hbp]
+\centering
+\begin{tabular}{lllrl}
+       func &            dep & indep &      corr &      p-value \\
+       \hline
+   pearsonr &          price &  rank &  0.048838 &     0.601044 \\
+   pearsonr &     sales\_last &  rank & -0.418686 &  0.000003*** \\
+   pearsonr &  comments\_last &  rank & -0.385328 &  0.000018*** \\
+  spearmanr &          price &  rank &  0.064618 &     0.488828 \\
+  spearmanr &     sales\_last &  rank & -0.571240 &  0.000000*** \\
+  spearmanr &  comments\_last &  rank & -0.454517 &  0.000000*** \\
+ kendalltau &          price &  rank &  0.040969 &     0.515410 \\
+ kendalltau &     sales\_last &  rank & -0.416305 &  0.000000*** \\
+ kendalltau &  comments\_last &  rank & -0.326366 &  0.000000*** \\
+\end{tabular}
+\caption{\label{correlation}: Correlations}
+\end{table}
+\end{frame}
+
+\section{Estimation}
+
+\begin{frame}
+\frametitle{Steps of Estimation}
+\begin{enumerate}
+\item Demand parameters: parameters of consumer utility $\alpha$
+\item Platform parameters: weighting of the ranking algorithm $\gamma$
+\item Seller parameters: marginal costs of products $c$
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Note for This Version}
+\begin{itemize}
+\item Accumulated comment number is also considered as a proxy of product quality, which will be excluded for the poor performance in the describe statistics and model estimation.
+\item The scale of sales and comment is set as log form to make the estimation work.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimation of Demand Parameters}
+\begin{itemize}
+\item Observed consideration set defined as the first 10 products by ranking algorithms
+\item MLE directly by mutinomial logit discrete choice model 
+\begin{align*}
+u_{ij} &= 3.29718207^{-6} -1.31976519^{-2} price_{t} \\
+&+  8.79789875^{-1} log(sales_{t-1})+ -8.01401981^{-2} log(comment_{t-1})
+\end{align*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimation of Platform Parameters}
+\begin{itemize}
+\item All available products defined as all scraped observations
+\item Maximum simulated likelihood estimation
+\begin{align*}
+w_{jt}  = &\exp[-1.20910197 (\frac{p_{jt}-\min_{k \in J_t}(p_{kt})}{std_{k \in J_t}}) \\
+&+ 0.39808008 (\frac{q_{jt}-\min_{k \in J_t}(log(q_{kt}))}{std_{k \in J_t}(log(q_{kt}))})  \\
+&+ 0.59927273 (\frac{m_{jt}-\min_{k \in J_t}(log(m_{kt}))}{std_{k \in J_t}(log(m_{kt}))})  
+]
+\end{align*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Estimation of Seller Parameters}
+\begin{itemize}
+\item Solving the optimization of maximizing profits of seller:
+$$
+c_j = p_j + \frac{D_{jt}(p_j)}{D'_{jt}}
+$$
+\end{itemize}
+\end{frame}
+
+\section{Simulation}
+\begin{frame}
+\frametitle{Simulation Methods}
+\begin{itemize}
+\item Calculate the total surplus as a function of algorithm parameters given other estimated parameters
+\item Change $\gamma$, find a solution that maximize total surplus
+\end{itemize}
+\end{frame}
+
+\section{Discussions}
+\begin{frame}
+\frametitle{Next Step}
+\begin{itemize}
+\item Extend the model from static to dynamic
+\item Improve the sample data
+\item Relax the assumption that qualities of goods are given / Allow entry and exit of sellers 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Further Work}
+\begin{itemize}
+\item Competition for product with horizontal differentation on one search results
+\item Obfuscation on search keywords by sellers
+\item Environment of recommender system 
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain]
+\frametitle{Contents}
+%\begin{multicols}{2}
+\tableofcontents[hideallsubsections]
+%\end{multicols}
+\end{frame}
+
+\end{document}
